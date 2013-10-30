@@ -15,6 +15,7 @@ void testApp::setup(){
 	gui2->loadSettings("GUI/guiSettings_2.xml"); 
 
 	/* Finish with UI Kinect setting up*/
+#ifndef __APPLE__
 	kinect.setRegistration(true);
 	kinect.init();
 	kinect.open();
@@ -27,6 +28,7 @@ void testApp::setup(){
 		ofLogNotice() << "sensor height: " << kinect.height;
 	}
 	colorImg.allocate(kinect.width, kinect.height);
+#endif
 	ofSetFrameRate(60);
 }
 
@@ -37,8 +39,10 @@ void testApp::update(){
 
 //--------------------------------------------------------------
 void testApp::draw(){
+#ifndef __APPLE__
 	kinect.drawDepth(20, BANNER_HEIGHT + 10, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	kinect.draw(20, BANNER_HEIGHT + DISPLAY_HEIGHT + 20, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+#endif
 }
 
 //--------------------------------------------------------------
