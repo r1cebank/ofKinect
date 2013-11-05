@@ -15,6 +15,9 @@
 #define DISPLAY_HEIGHT 240
 #define DISPLAY_WIDTH 320
 
+#define LEFT_SPACING 20
+#define TOP_SPACING 20
+
 #define __NO_KINECT__
 
 class testApp : public ofBaseApp{
@@ -37,9 +40,11 @@ class testApp : public ofBaseApp{
 		//Util Functions
 		void translateCoord(int &x, int &y, int widgetX, int widgetY);
 		unsigned char * smooth(unsigned char* input);
+        void initData();
 
 		//UI Functions
-		void exit(); 
+        void initUI();
+		void exit();
 		void guiEvent(ofxUIEventArgs &e);
 
 		//UI Canvas
@@ -48,6 +53,7 @@ class testApp : public ofBaseApp{
 		
 		//Sensor
 		ofxKinect kinect;
+        void initKinect();
 
 		//OpenCV
 		ofxCvColorImage colorImage;
@@ -62,5 +68,8 @@ class testApp : public ofBaseApp{
 		int currentX, currentY;
 		int zeroCounter;
 		float gaussianValue;
+        float innerWeight;
+        float innerBand, outerBand;
+        ofImage noKinectImage;
 		unsigned char* smoothPixel;
 };

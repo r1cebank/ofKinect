@@ -2,33 +2,35 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
-	ofSetLogLevel(OF_LOG_VERBOSE);
-	smoothPixel = new unsigned char[kinect.width*kinect.height];
-	//ofLogToFile("log.log", false);
-	ofSetBackgroundColor(153, 151, 136);
-	//TODO: Move UI Setting in another function
-	gui = new ofxUICanvas(0,0, WIDTH+CONTROL_WIDTH, BANNER_HEIGHT);
-	gui2 = new ofxUICanvas(WIDTH, BANNER_HEIGHT, CONTROL_WIDTH, CONTROL_HEIGHT);
-	gui->addWidgetDown(new ofxUILabel("Kinect w/ openframeworks by Siyuan Gao", OFX_UI_FONT_MEDIUM));
-	gui->addWidgetDown(new ofxUILabel("Tohoku University, Purdue University", OFX_UI_FONT_SMALL));
-	gui2->addWidgetDown(new ofxUILabel("Values", OFX_UI_FONT_MEDIUM));
-	gui2->addSpacer();
-	gui2->addWidgetDown(new ofxUILabel("Mouse X", "", OFX_UI_FONT_SMALL));
-	gui2->addWidgetDown(new ofxUILabel("Mouse Y", "", OFX_UI_FONT_SMALL));
-	gui2->addWidgetDown(new ofxUILabel("Distance", "", OFX_UI_FONT_SMALL));
-	gui2->addWidgetDown(new ofxUILabel("Zero", "", OFX_UI_FONT_SMALL));
-	gui2->addWidgetDown(new ofxUILabel("Control", OFX_UI_FONT_MEDIUM));
-	gui2->addSpacer();
-	gui2->addWidgetDown(new ofxUIToggle(20, 20, false, "Translate Mouse Coord"));
-	gui2->addWidgetDown(new ofxUISlider(100, 20, 0, 20, &gaussianValue, "Blur"));
-	ofAddListener(gui->newGUIEvent, this, &testApp::guiEvent); 
-	gui->loadSettings("GUI/guiSettings_1.xml"); 
-	gui2->loadSettings("GUI/guiSettings_2.xml"); 
-
+    initData();
+    ofSetBackgroundColor(230, 230, 230);
+    initUI(); //Initialize UI
 	/* Finish with UI Kinect setting up*/
 #ifndef __APPLE__
 #ifndef __NO_KINECT__
-	kinect.setRegistration(true);
+    initKinect();
+#endif
+#endif
+	ofSetFrameRate(60);
+}
+
+void testApp::initData(){
+    ofSetLogLevel(OF_LOG_VERBOSE);
+	smoothPixel = new unsigned char[kinect.width*kinect.height];
+	//ofLogToFile("log.log", false);
+#if defined(__APPLE__) || defined(__NO_KINECT__)
+    noKinectImage.loadImage("images/noKinect.jpg");
+    colorImage.allocate(320, 240);
+    grayImage.allocate(320, 240);
+    colorImage.setFromPixels(noKinectImage.getPixels(), 320, 240);
+    grayImage.setFromPixels(noKinectImage.getPixels(), 320, 240);
+    noKinectImage.clear();
+#endif
+
+}
+
+void testApp::initKinect(){
+    kinect.setRegistration(true);
 	kinect.init();
 	kinect.open();
 	if(kinect.isConnected()) {
@@ -41,10 +43,33 @@ void testApp::setup(){
 	}
 	colorImage.allocate(kinect.width, kinect.height);
 	grayImage.allocate(kinect.width, kinect.height);
+}
 
-#endif
-#endif
-	ofSetFrameRate(60);
+void testApp::initUI(){
+    gui = new ofxUICanvas(0,0, WIDTH+CONTROL_WIDTH, BANNER_HEIGHT);
+	gui2 = new ofxUICanvas(WIDTH, BANNER_HEIGHT, CONTROL_WIDTH, CONTROL_HEIGHT);
+    gui->setWidgetSpacing(8);
+    gui2->setWidgetSpacing(8);
+	gui->addWidgetDown(new ofxUILabel("Kinect w/ openframeworks by Siyuan Gao", OFX_UI_FONT_MEDIUM));
+	gui->addWidgetDown(new ofxUILabel("Tohoku University, Purdue University", OFX_UI_FONT_SMALL));
+	gui2->addWidgetDown(new ofxUILabel("Values", OFX_UI_FONT_MEDIUM));
+	gui2->addSpacer();
+	gui2->addWidgetDown(new ofxUILabel("Mouse X", "", OFX_UI_FONT_SMALL));
+	gui2->addWidgetDown(new ofxUILabel("Mouse Y", "", OFX_UI_FONT_SMALL));
+	gui2->addWidgetDown(new ofxUILabel("Distance", "", OFX_UI_FONT_SMALL));
+	gui2->addWidgetDown(new ofxUILabel("Zero", "", OFX_UI_FONT_SMALL));
+	gui2->addWidgetDown(new ofxUILabel("Control", OFX_UI_FONT_MEDIUM));
+	gui2->addSpacer();
+	gui2->addWidgetDown(new ofxUIToggle(15, 15, false, "Translate Mouse Coord"));
+	gui2->addWidgetDown(new ofxUISlider(150, 20, 0, 20, &gaussianValue, "Blur"));
+    gui2->addWidgetDown(new ofxUILabel("Noise Reduction", OFX_UI_FONT_MEDIUM));
+	gui2->addSpacer();
+    gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &innerBand, "Inner Band Size"));
+    gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &outerBand, "Outer Band Size"));
+    gui2->addWidgetDown(new ofxUIRotarySlider(40, 0, 1, &innerWeight, "Inner Band Weight"));
+	ofAddListener(gui->newGUIEvent, this, &testApp::guiEvent);
+	gui->loadSettings("GUI/guiSettings_1.xml");
+	gui2->loadSettings("GUI/guiSettings_2.xml");
 }
 
 //--------------------------------------------------------------
@@ -59,11 +84,11 @@ void testApp::update(){
 	}
 #endif
 #endif
-	if((mouseX > 20 && mouseY > BANNER_HEIGHT + DISPLAY_HEIGHT + 20) &&
-		(mouseX < 20 + DISPLAY_WIDTH && mouseY < BANNER_HEIGHT + DISPLAY_HEIGHT * 2 + 20)) {
+	if((mouseX > LEFT_SPACING && mouseY > BANNER_HEIGHT + DISPLAY_HEIGHT + TOP_SPACING * 2) &&
+		(mouseX < LEFT_SPACING + DISPLAY_WIDTH && mouseY < BANNER_HEIGHT + DISPLAY_HEIGHT * 2 + TOP_SPACING * 2)) {
 			currentX = mouseX;
 			currentY = mouseY;
-			translateCoord(currentX, currentY, 20, BANNER_HEIGHT + DISPLAY_HEIGHT + 20);
+			translateCoord(currentX, currentY, LEFT_SPACING, BANNER_HEIGHT + DISPLAY_HEIGHT + TOP_SPACING * 2);
 #ifndef __APPLE__
 #ifndef __NO_KINECT__
 			if(kinect.getDistanceAt(currentX*2, currentY*2) > 0) {
@@ -98,8 +123,8 @@ void testApp::translateCoord(int &x, int &y, int widgetX, int widgetY) {
 void testApp::draw(){
 	//kinect.drawDepth(20, BANNER_HEIGHT + 10, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	//kinect.draw(20, BANNER_HEIGHT + DISPLAY_HEIGHT + 20, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-	colorImage.draw(20, BANNER_HEIGHT + 10, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-	grayImage.draw(20, BANNER_HEIGHT + DISPLAY_HEIGHT + 20, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	colorImage.draw(LEFT_SPACING, BANNER_HEIGHT + TOP_SPACING, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	grayImage.draw(LEFT_SPACING, BANNER_HEIGHT + DISPLAY_HEIGHT + TOP_SPACING * 2, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	//Draw depth and color image
 	((ofxUILabel*)(gui2->getWidget("Distance")))->setLabel("Distance: " + ofToString(distance));
 	((ofxUILabel*)(gui2->getWidget("Zero")))->setLabel("Zero Values: " + ofToString(zeroCounter));
