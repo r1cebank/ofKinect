@@ -12,8 +12,10 @@
 #endif
 #define HEIGHT 600
 #define BANNER_HEIGHT 50
-#define DISPLAY_HEIGHT 225
-#define DISPLAY_WIDTH 300
+#define DISPLAY_HEIGHT 240
+#define DISPLAY_WIDTH 320
+
+//#define NO_KINECT 1
 
 class testApp : public ofBaseApp{
 
@@ -32,6 +34,10 @@ class testApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+		//Util Functions
+		void translateCoord(int &x, int &y, int widgetX, int widgetY);
+		unsigned char * smooth(unsigned char* input);
+
 		//UI Functions
 		void exit(); 
 		void guiEvent(ofxUIEventArgs &e);
@@ -44,12 +50,17 @@ class testApp : public ofBaseApp{
 		ofxKinect kinect;
 
 		//OpenCV
-		ofxCvColorImage colorImg;
+		ofxCvColorImage colorImage;
 		ofxCvGrayscaleImage grayImage; // grayscale depth image
-		ofxCvGrayscaleImage grayThreshNear; // the near thresholded image
-		ofxCvGrayscaleImage grayThreshFar; // the far thresholded image
-		ofxCvContourFinder contourFinder;
+		ofxCvColorImage distanceImage;
 	
 		// used for viewing the point cloud
 		ofEasyCam easyCam;
+
+		//Misc Variables
+		ofVec3f distance;
+		int currentX, currentY;
+		int zeroCounter;
+		float gaussianValue;
+		unsigned char* smoothPixel;
 };
