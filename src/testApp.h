@@ -15,7 +15,7 @@
 #define DISPLAY_HEIGHT 240
 #define DISPLAY_WIDTH 320
 
-//#define NO_KINECT 1
+#define __NO_KINECT__
 
 class testApp : public ofBaseApp{
 
