@@ -4,6 +4,7 @@
 #include "ofxUI.h"
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
+#include "ofxDepthImageCompressor.h"
 
 #define WIDTH 800
 #define CONTROL_WIDTH 200
@@ -18,7 +19,7 @@
 #define LEFT_SPACING 20
 #define TOP_SPACING 20
 
-#define __NO_KINECT__
+//#define __NO_KINECT__
 
 class testApp : public ofBaseApp{
 
@@ -67,9 +68,9 @@ class testApp : public ofBaseApp{
 		ofVec3f distance;
 		int currentX, currentY;
 		int zeroCounter;
-		float gaussianValue;
         float innerWeight;
         float innerBand, outerBand;
         ofImage noKinectImage;
 		unsigned char* smoothPixel;
+		ofxDepthImageCompressor c;
 };

@@ -61,13 +61,13 @@ void testApp::initUI(){
 	gui2->addWidgetDown(new ofxUILabel("Control", OFX_UI_FONT_MEDIUM));
 	gui2->addSpacer();
 	gui2->addWidgetDown(new ofxUIToggle(15, 15, false, "Translate Mouse Coord"));
-	gui2->addWidgetDown(new ofxUISlider(150, 20, 0, 20, &gaussianValue, "Blur"));
     gui2->addWidgetDown(new ofxUILabel("Noise Reduction", OFX_UI_FONT_MEDIUM));
 	gui2->addSpacer();
     gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &innerBand, "Inner Band Size"));
     gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &outerBand, "Outer Band Size"));
     gui2->addWidgetDown(new ofxUIRotarySlider(40, 0, 1, &innerWeight, "Inner Band Weight"));
-	ofAddListener(gui->newGUIEvent, this, &testApp::guiEvent);
+	gui2->addWidgetDown(new ofxUILabelButton(150,false,"Capture"));
+	ofAddListener(gui2->newGUIEvent, this, &testApp::guiEvent);
 	gui->loadSettings("GUI/guiSettings_1.xml");
 	gui2->loadSettings("GUI/guiSettings_2.xml");
 }
@@ -80,7 +80,6 @@ void testApp::update(){
 	if(kinect.isFrameNew()) {
 		grayImage.setFromPixels(smooth(kinect.getDepthPixels()), kinect.width, kinect.height);
 		colorImage.setFromPixels(kinect.getPixels(), kinect.width, kinect.height);
-		grayImage.blurGaussian(floor(gaussianValue));
 	}
 #endif
 #endif
@@ -199,5 +198,13 @@ void testApp::exit()
 void testApp::guiEvent(ofxUIEventArgs &e)
 {
 	string widgetName = e.widget->getName();
+	if(widgetName == "Capture"){
+		if(((ofxUILabelButton*) e.widget)->getValue()) {
+			ofLogNotice() << "Capturing Depth Image";
+			ofSaveImage(kinect.getPixelsRef(), "capture/" + ofGetTimestampString() + ".jpg", OF_IMAGE_QUALITY_BEST);
+			c.saveToRaw("capture/" + ofGetTimestampString() + ".raw", kinect.getRawDepthPixels());
+			c.saveToCompressedPng("capture/" + ofGetTimestampString() + ".png", kinect.getRawDepthPixels());
+		}
+	}
 }
 
