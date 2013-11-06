@@ -23,7 +23,7 @@ void testApp::initData(){
     colorImage.allocate(320, 240);
     grayImage.allocate(320, 240);
     colorImage.setFromPixels(noKinectImage.getPixels(), 320, 240);
-    grayImage.setFromPixels(noKinectImage.getPixels(), 320, 240);
+    grayImage = colorImage;
     noKinectImage.clear();
 #endif
 
@@ -200,10 +200,14 @@ void testApp::guiEvent(ofxUIEventArgs &e)
 	string widgetName = e.widget->getName();
 	if(widgetName == "Capture"){
 		if(((ofxUILabelButton*) e.widget)->getValue()) {
+#ifndef __APPLE__
+#ifndef __NO_KINECT__
 			ofLogNotice() << "Capturing Depth Image";
 			ofSaveImage(kinect.getPixelsRef(), "capture/" + ofGetTimestampString() + ".jpg", OF_IMAGE_QUALITY_BEST);
 			c.saveToRaw("capture/" + ofGetTimestampString() + ".raw", kinect.getRawDepthPixels());
 			c.saveToCompressedPng("capture/" + ofGetTimestampString() + ".png", kinect.getRawDepthPixels());
+#endif
+#endif
 		}
 	}
 }

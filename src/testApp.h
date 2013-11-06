@@ -19,7 +19,7 @@
 #define LEFT_SPACING 20
 #define TOP_SPACING 20
 
-//#define __NO_KINECT__
+#define __NO_KINECT__
 
 class testApp : public ofBaseApp{
 
