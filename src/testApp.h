@@ -6,12 +6,10 @@
 #include "ofxKinect.h"
 #include "ofxDepthImageCompressor.h"
 
-#define WIDTH 800
-#define CONTROL_WIDTH 200
-#ifndef CONTROL_HEIGHT
+#define WIDTH 1200
+#define HEIGHT 700
+#define CONTROL_WIDTH 210
 #define CONTROL_HEIGHT 600
-#endif
-#define HEIGHT 600
 #define BANNER_HEIGHT 50
 #define DISPLAY_HEIGHT 240
 #define DISPLAY_WIDTH 320
@@ -40,8 +38,11 @@ class testApp : public ofBaseApp{
 
 		//Util Functions
 		void translateCoord(int &x, int &y, int widgetX, int widgetY);
-		unsigned char * smooth(unsigned char* input);
         void initData();
+
+		//Filter Functions
+		void simpleROI();
+		void frameMergeFilter();
 
 		//UI Functions
         void initUI();
@@ -66,11 +67,13 @@ class testApp : public ofBaseApp{
 
 		//Misc Variables
 		ofVec3f distance;
-		int currentX, currentY;
 		int zeroCounter;
         float innerWeight;
         float innerBand, outerBand;
         ofImage noKinectImage;
-		unsigned char* smoothPixel;
 		ofxDepthImageCompressor c;
+		bool simpleROISmooth;
+		bool frameMerge;
+		//UI Items
+
 };
