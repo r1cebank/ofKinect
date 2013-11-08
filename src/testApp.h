@@ -5,6 +5,7 @@
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
 #include "ofxDepthImageCompressor.h"
+#include "FrameMerger.h"
 
 #define WIDTH 1200
 #define HEIGHT 700
@@ -17,7 +18,7 @@
 #define LEFT_SPACING 20
 #define TOP_SPACING 20
 
-#define __NO_KINECT__
+//#define __NO_KINECT__
 
 class testApp : public ofBaseApp{
 
@@ -43,6 +44,9 @@ class testApp : public ofBaseApp{
 		//Filter Functions
 		void simpleROI();
 		void frameMergeFilter();
+
+		//Filter Var
+		FrameMerger *merger;
 
 		//UI Functions
         void initUI();

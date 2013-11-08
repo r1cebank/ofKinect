@@ -29,6 +29,8 @@ void testApp::initData(){
 	//Filter Flags
 	simpleROISmooth = false;
 	frameMerge = false;
+	//Filters
+	merger = new FrameMerger(3, 640 * 480);
 }
 
 void testApp::initKinect(){
@@ -56,7 +58,7 @@ void testApp::initUI(){
 	gui->addWidgetDown(new ofxUILabel("Tohoku University, Purdue University", OFX_UI_FONT_SMALL));
     gui2->addWidgetDown(new ofxUILabel("Noise Reduction", OFX_UI_FONT_MEDIUM));
 	gui2->addSpacer();
-	gui2->addWidgetDown(new ofxUIToggle("Enable Frame Merge", frameMerge, 20, 20));
+	gui2->addWidgetDown(new ofxUIToggle("Enable Frame Merge", &frameMerge, 20, 20));
     gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &innerBand, "Inner Band Size"));
     gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &outerBand, "Outer Band Size"));
     gui2->addWidgetDown(new ofxUIRotarySlider(40, 0, 1, &innerWeight, "Inner Band Weight"));
@@ -75,13 +77,16 @@ void testApp::update(){
                 grayImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
                 colorImage.setFromPixels(kinect.getPixels(), kinect.width, kinect.height);
         }
-		if(frameMerge)
+		if(frameMerge) {
 			frameMergeFilter();
+			ofLogNotice() << "Merging Frame";
+		}
 #endif
 #endif
 }
 
 void testApp::frameMergeFilter(){
+	grayImage.setFromPixels(merger->addFrame(grayImage.getPixels()), kinect.width, kinect.height);
 }
 
 void testApp::simpleROI()
@@ -90,7 +95,7 @@ void testApp::simpleROI()
 #ifndef __APPLE__
 #ifndef __NO_KINECT__
 	for(int i = 0; i< kinect.height* kinect.width; i++) {
-		if(input[i] == 0) {
+		if(grayImage.getPixels()[i] == 0) {
 			zeroCounter++;
 		}
 	}
