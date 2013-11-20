@@ -6,14 +6,15 @@
 #include "ofxKinect.h"
 #include "ofxDepthImageCompressor.h"
 #include "FrameMerger.h"
+#include "Filter.h"
 
 #define WIDTH 1200
 #define HEIGHT 700
 #define CONTROL_WIDTH 210
 #define CONTROL_HEIGHT 600
 #define BANNER_HEIGHT 50
-#define DISPLAY_HEIGHT 240
-#define DISPLAY_WIDTH 320
+#define DISPLAY_HEIGHT 480
+#define DISPLAY_WIDTH 640
 
 #define LEFT_SPACING 20
 #define TOP_SPACING 20
@@ -44,9 +45,12 @@ class testApp : public ofBaseApp{
 		//Filter Functions
 		void simpleROI();
 		void frameMergeFilter();
+		void sharpenImage();
+		void invertImage();
 
 		//Filter Var
 		FrameMerger *merger;
+		Filter *filter;
 
 		//UI Functions
         void initUI();
@@ -56,6 +60,12 @@ class testApp : public ofBaseApp{
 		//UI Canvas
 		ofxUICanvas *gui;
 		ofxUICanvas *gui2;
+
+		//UI Widgets
+		ofxUIToggle *sharpen, *useInvert;
+		ofxUIIntSlider *sharpenBlurSlider;
+		int sharpenBlurSize;
+		bool sharpenOn, invertOn;
 		
 		//Sensor
 		ofxKinect kinect;
@@ -65,6 +75,7 @@ class testApp : public ofBaseApp{
 		ofxCvColorImage colorImage;
 		ofxCvGrayscaleImage grayImage; // grayscale depth image
 		ofxCvColorImage distanceImage;
+		ofxCvGrayscaleImage invertBackup, sharpenBackup;
 	
 		// used for viewing the point cloud
 		ofEasyCam easyCam;
@@ -78,6 +89,7 @@ class testApp : public ofBaseApp{
 		ofxDepthImageCompressor c;
 		bool simpleROISmooth;
 		bool frameMerge;
+		bool filterOn;
 		//UI Items
 
 };

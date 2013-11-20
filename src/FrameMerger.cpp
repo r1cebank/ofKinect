@@ -32,6 +32,7 @@ unsigned char* FrameMerger::addFrame(unsigned char* image){
 			}
 		}
 	}
+	//ofLogNotice() << "Queue Size: " << frames.size();
 	return outputImage;
 }
 

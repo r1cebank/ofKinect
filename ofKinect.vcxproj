@@ -90,6 +90,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Filter.cpp" />
     <ClCompile Include="src\FrameMerger.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofxDepthImageCompressor.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="..\..\..\addons\ofxCv\libs\ofxCv\src\Wrappers.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Filter.h" />
     <ClInclude Include="src\FrameMerger.h" />
     <ClInclude Include="src\ofxDepthImageCompressor.h" />
     <ClInclude Include="src\testApp.h" />

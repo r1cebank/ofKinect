@@ -29,8 +29,10 @@ void testApp::initData(){
 	//Filter Flags
 	simpleROISmooth = false;
 	frameMerge = false;
+	filterOn = false;
 	//Filters
-	merger = new FrameMerger(3, 640 * 480);
+	merger = new FrameMerger(10, 640 * 480);
+	filter = new Filter(1);
 }
 
 void testApp::initKinect(){
@@ -59,10 +61,20 @@ void testApp::initUI(){
     gui2->addWidgetDown(new ofxUILabel("Noise Reduction", OFX_UI_FONT_MEDIUM));
 	gui2->addSpacer();
 	gui2->addWidgetDown(new ofxUIToggle("Enable Frame Merge", &frameMerge, 20, 20));
+	gui2->addWidgetDown(new ofxUIToggle("Filter Frame", &filterOn, 20, 20));
     gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &innerBand, "Inner Band Size"));
     gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &outerBand, "Outer Band Size"));
     gui2->addWidgetDown(new ofxUIRotarySlider(40, 0, 1, &innerWeight, "Inner Band Weight"));
 	gui2->addWidgetDown(new ofxUILabelButton(150,false,"Capture"));
+	gui2->addWidgetDown(new ofxUILabel("Processing", OFX_UI_FONT_MEDIUM));
+	gui2->addSpacer();
+	sharpen = new ofxUIToggle("Sharpen", &sharpenOn, 15, 15);
+	sharpenBlurSlider = new ofxUIIntSlider("Sharpen Blur", 1, 40, &sharpenBlurSize, 170, 20);
+	useInvert = new ofxUIToggle("Invert", &invertOn, 15, 15);
+	gui2->addWidgetDown(sharpen);
+	gui2->addWidgetDown(sharpenBlurSlider);
+	gui2->addWidgetDown(useInvert);
+	gui2->addFPS();
 	ofAddListener(gui2->newGUIEvent, this, &testApp::guiEvent);
 	gui->loadSettings("GUI/guiSettings_1.xml");
 	gui2->loadSettings("GUI/guiSettings_2.xml");
@@ -81,6 +93,13 @@ void testApp::update(){
 			frameMergeFilter();
 			ofLogNotice() << "Merging Frame";
 		}
+		if(filterOn) {
+			grayImage.setFromPixels(filter->getFrame(grayImage), kinect.width, kinect.height);
+		}
+		if(sharpenOn)
+			sharpenImage();
+		if(invertOn)
+			invertImage();
 #endif
 #endif
 }
@@ -105,8 +124,9 @@ void testApp::simpleROI()
 
 //--------------------------------------------------------------
 void testApp::draw(){
-	colorImage.draw(LEFT_SPACING, BANNER_HEIGHT + TOP_SPACING, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-	grayImage.draw(LEFT_SPACING, BANNER_HEIGHT + DISPLAY_HEIGHT + TOP_SPACING * 2, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	grayImage.draw(LEFT_SPACING, BANNER_HEIGHT + TOP_SPACING, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	//colorImage.draw(LEFT_SPACING, BANNER_HEIGHT + TOP_SPACING, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	//grayImage.draw(LEFT_SPACING, BANNER_HEIGHT + DISPLAY_HEIGHT + TOP_SPACING * 2, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	ofDrawBitmapStringHighlight("x: " + ofToString(mouseX) + " y: " + ofToString(mouseY), 20, 680, ofColor::seaGreen, ofColor::white);
 }
 
@@ -167,6 +187,24 @@ void testApp::exit()
     delete gui; 
 	delete gui2;
 }
+
+void testApp::invertImage(){
+	grayImage.invert();
+}
+
+void testApp::sharpenImage(){
+	sharpenBackup.setFromPixels(grayImage.getPixels(), grayImage.width, grayImage.height);
+	ofLogNotice() << "Sharpening...";
+	ofxCvGrayscaleImage temp;
+	temp.allocate(grayImage.getWidth(), grayImage.getHeight());
+	temp.setFromPixels(grayImage.getPixelsRef());
+	temp.blurGaussian(sharpenBlurSize);
+	ofRectangle tempROI = grayImage.getROI();
+	grayImage.resetROI();
+	grayImage.absDiff(temp);
+	grayImage.setROI(tempROI);
+}
+
 
 void testApp::guiEvent(ofxUIEventArgs &e)
 {

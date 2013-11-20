@@ -100,6 +100,7 @@
     <ClCompile Include="src\testApp.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\FrameMerger.cpp" />
+    <ClCompile Include="src\Filter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\addons\ofxOpenCv\libs\opencv\include\opencv2\flann\all_indices.h">
@@ -635,6 +636,7 @@
     </ClInclude>
     <ClInclude Include="src\testApp.h" />
     <ClInclude Include="src\FrameMerger.h" />
+    <ClInclude Include="src\Filter.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="of">
