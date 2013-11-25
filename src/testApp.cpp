@@ -124,7 +124,9 @@ void testApp::findContour(){
 void testApp::frameMergeFilter(){
 	grayImage.setFromPixels(merger->addFrame(grayImage.getPixels()), kinect.width, kinect.height);
 }
+
 void testApp::drawContours(){
+	ofNoFill();
 	if(contourOn){
 		contourFinder.draw(20, 70, 640, 480);
 		ofColor c(255, 0, 0);
@@ -136,6 +138,8 @@ void testApp::drawContours(){
 			ofRect(r);
 		}
 	}
+	ofFill();
+	ofSetColor(ofColor::white);
 }
 
 void testApp::simpleROI()
