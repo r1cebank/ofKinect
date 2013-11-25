@@ -47,6 +47,8 @@ class testApp : public ofBaseApp{
 		void frameMergeFilter();
 		void sharpenImage();
 		void invertImage();
+		void findContour();
+		void drawContours();
 
 		//Filter Var
 		FrameMerger *merger;
@@ -62,10 +64,12 @@ class testApp : public ofBaseApp{
 		ofxUICanvas *gui2;
 
 		//UI Widgets
-		ofxUIToggle *sharpen, *useInvert;
-		ofxUIIntSlider *sharpenBlurSlider;
+		ofxUIToggle *sharpen, *showContour, *findHolesToggle, *useApproxToggle, *useInvert;
+		ofxUIIntSlider *sharpenBlurSlider, *boundSlider, *minAreaSlider, *maxAreaSlider, *nConsideredSlider;
 		int sharpenBlurSize;
-		bool sharpenOn, invertOn;
+		bool sharpenOn, invertOn, contourOn;
+		int minArea, maxArea, nConsidered;
+		bool findHoles, useApprox;
 		
 		//Sensor
 		ofxKinect kinect;
@@ -76,6 +80,7 @@ class testApp : public ofBaseApp{
 		ofxCvGrayscaleImage grayImage; // grayscale depth image
 		ofxCvColorImage distanceImage;
 		ofxCvGrayscaleImage invertBackup, sharpenBackup;
+		ofxCvContourFinder contourFinder;
 	
 		// used for viewing the point cloud
 		ofEasyCam easyCam;
@@ -91,5 +96,6 @@ class testApp : public ofBaseApp{
 		bool frameMerge;
 		bool filterOn;
 		//UI Items
+
 
 };

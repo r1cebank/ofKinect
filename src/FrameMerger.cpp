@@ -17,9 +17,11 @@ FrameMerger::~FrameMerger(void){
 
 unsigned char* FrameMerger::addFrame(unsigned char* image){
 	unsigned char* temp = new unsigned char [imageSize];
+	unsigned char* returned = new unsigned char [imageSize];
 	memcpy(temp, image, imageSize);
+	memcpy(returned, image, imageSize);
 	frames.push_back(temp);
-	outputImage = frames[frames.size() - 1];
+	outputImage = returned;
 	if(frames.size() > maxSize) {
 		frames.erase(frames.begin());
 	}

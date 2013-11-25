@@ -31,7 +31,7 @@ void testApp::initData(){
 	frameMerge = false;
 	filterOn = false;
 	//Filters
-	merger = new FrameMerger(10, 640 * 480);
+	merger = new FrameMerger(3, 640 * 480);
 	filter = new Filter(1);
 }
 
@@ -62,18 +62,29 @@ void testApp::initUI(){
 	gui2->addSpacer();
 	gui2->addWidgetDown(new ofxUIToggle("Enable Frame Merge", &frameMerge, 20, 20));
 	gui2->addWidgetDown(new ofxUIToggle("Filter Frame", &filterOn, 20, 20));
-    gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &innerBand, "Inner Band Size"));
-    gui2->addWidgetDown(new ofxUISlider(150, 20, 1, 5, &outerBand, "Outer Band Size"));
-    gui2->addWidgetDown(new ofxUIRotarySlider(40, 0, 1, &innerWeight, "Inner Band Weight"));
 	gui2->addWidgetDown(new ofxUILabelButton(150,false,"Capture"));
 	gui2->addWidgetDown(new ofxUILabel("Processing", OFX_UI_FONT_MEDIUM));
 	gui2->addSpacer();
 	sharpen = new ofxUIToggle("Sharpen", &sharpenOn, 15, 15);
 	sharpenBlurSlider = new ofxUIIntSlider("Sharpen Blur", 1, 40, &sharpenBlurSize, 170, 20);
 	useInvert = new ofxUIToggle("Invert", &invertOn, 15, 15);
+	showContour = new ofxUIToggle("Show Contour", &contourOn, 15, 15);
 	gui2->addWidgetDown(sharpen);
 	gui2->addWidgetDown(sharpenBlurSlider);
 	gui2->addWidgetDown(useInvert);
+	gui2->addWidgetDown(new ofxUILabel("Contour Finder", OFX_UI_FONT_MEDIUM));
+	minAreaSlider = new ofxUIIntSlider("Min Area", 1, 640*480, &minArea, 170, 20);
+	maxAreaSlider = new ofxUIIntSlider("Max Area", 1, 640*480, &maxArea, 170, 20);
+	nConsideredSlider = new ofxUIIntSlider("nConsidered", 1, 100, &nConsidered, 170, 20);
+	findHolesToggle = new ofxUIToggle("Find Holes", &findHoles, 15, 15);
+	useApproxToggle = new ofxUIToggle("Use Approximation", &useApprox, 15, 15);
+	gui2->addSpacer();
+	gui2->addWidgetDown(showContour);
+	gui2->addWidgetDown(minAreaSlider);
+	gui2->addWidgetDown(maxAreaSlider);
+	gui2->addWidgetDown(nConsideredSlider);
+	gui2->addWidgetDown(findHolesToggle);
+	gui2->addWidgetDown(useApproxToggle);
 	gui2->addFPS();
 	ofAddListener(gui2->newGUIEvent, this, &testApp::guiEvent);
 	gui->loadSettings("GUI/guiSettings_1.xml");
@@ -91,7 +102,7 @@ void testApp::update(){
         }
 		if(frameMerge) {
 			frameMergeFilter();
-			ofLogNotice() << "Merging Frame";
+			//ofLogNotice() << "Merging Frame";
 		}
 		if(filterOn) {
 			grayImage.setFromPixels(filter->getFrame(grayImage), kinect.width, kinect.height);
@@ -100,12 +111,31 @@ void testApp::update(){
 			sharpenImage();
 		if(invertOn)
 			invertImage();
+		if(contourOn)
+			findContour();
 #endif
 #endif
 }
 
+void testApp::findContour(){
+	contourFinder.findContours(grayImage, minArea, maxArea, nConsidered, findHoles, useApprox);
+}
+
 void testApp::frameMergeFilter(){
 	grayImage.setFromPixels(merger->addFrame(grayImage.getPixels()), kinect.width, kinect.height);
+}
+void testApp::drawContours(){
+	if(contourOn){
+		contourFinder.draw(20, 70, 640, 480);
+		ofColor c(255, 0, 0);
+		for(int i = 0; i < contourFinder.nBlobs; i++) {
+			ofRectangle r = contourFinder.blobs.at(i).boundingRect;
+			r.x += 20; r.y += 70;
+			c.setHsb(i * 64, 255, 255);
+			ofSetColor(c);
+			ofRect(r);
+		}
+	}
 }
 
 void testApp::simpleROI()
@@ -128,6 +158,8 @@ void testApp::draw(){
 	//colorImage.draw(LEFT_SPACING, BANNER_HEIGHT + TOP_SPACING, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	//grayImage.draw(LEFT_SPACING, BANNER_HEIGHT + DISPLAY_HEIGHT + TOP_SPACING * 2, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	ofDrawBitmapStringHighlight("x: " + ofToString(mouseX) + " y: " + ofToString(mouseY), 20, 680, ofColor::seaGreen, ofColor::white);
+	if(contourOn)
+		drawContours();
 }
 
 //--------------------------------------------------------------
@@ -194,7 +226,7 @@ void testApp::invertImage(){
 
 void testApp::sharpenImage(){
 	sharpenBackup.setFromPixels(grayImage.getPixels(), grayImage.width, grayImage.height);
-	ofLogNotice() << "Sharpening...";
+	//ofLogNotice() << "Sharpening...";
 	ofxCvGrayscaleImage temp;
 	temp.allocate(grayImage.getWidth(), grayImage.getHeight());
 	temp.setFromPixels(grayImage.getPixelsRef());
