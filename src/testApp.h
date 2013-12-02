@@ -42,6 +42,7 @@ class testApp : public ofBaseApp{
 		void translateCoord(int &x, int &y, int widgetX, int widgetY);
         void initData();
 		void saveMesh();
+		void setAvgDev(double &average, unsigned char &maxDev); 
 
 		//Filter Functions
 		void simpleROI();
@@ -82,6 +83,7 @@ class testApp : public ofBaseApp{
 		ofxCvColorImage distanceImage;
 		ofxCvGrayscaleImage invertBackup, sharpenBackup;
 		ofxCvContourFinder contourFinder;
+		ofxCvGrayscaleImage contourImage;
 	
 		// used for viewing the point cloud
 		ofEasyCam easyCam;

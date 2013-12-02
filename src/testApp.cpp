@@ -129,7 +129,10 @@ void testApp::drawContours(){
 	float x, y, area, length, width, height;
 	float realX, realY;
 	ofPoint centroid;
+	string trackingID;
 	ofxCvBlob blob;
+	double average, centerX, centerY;
+	unsigned char maxDev;
 	ofNoFill();
 	if(contourOn){
 		contourFinder.draw(20, 70, 640, 480);
@@ -148,17 +151,56 @@ void testApp::drawContours(){
 			ofRect(r);
 			//Drawing point
 			ofCircle(centroid.x + 20, centroid.y + 70, 4);
+			//Getting Center point and drawing it
+			centerX = width / 2 + x;
+			centerY = height / 2 + y; //Relative to image start from (0,0)
+			ofCircle(centerX + 20, centerY + 70, 2);
+
+			//Setting ROI, getting Image Info
+			grayImage.setROI(r.x, r.y, width, height);
+			contourImage.setFromPixels(grayImage.getRoiPixelsRef());
+			grayImage.resetROI();
+			setAvgDev(average, maxDev);
 
 			//Drawing informations
+			trackingID = ofToString(average) + "#" + ofToString(area) + "#" + ofToString((int)maxDev) + "#" + 
+						ofToString(centroid.x - centerX) + "#" + ofToString(centroid.y - centerY);
 			realX = x + 20;
 			realY = y + 70;
 			ofDrawBitmapString("x:" + ofToString(x) + " y:" + ofToString(y), realX, realY - 11);
 			ofDrawBitmapString("width:" + ofToString(width) + " height:" + ofToString(height), realX, realY - 11*2);
 			ofDrawBitmapString("area:" + ofToString(area) + " length:" + ofToString(length), realX, realY - 11*3);
+			ofDrawBitmapString("tracking ID: " + trackingID, realX, realY - 11*4); //Tracking ID is set from average distance area max/mindev center to centroiddev
+			//231#12312#1#2#-1#1
 		}
 	}
 	ofFill();
 	ofSetColor(ofColor::white);
+}
+
+void testApp::setAvgDev(double &average, unsigned char &maxDev)
+{
+	int total = 0;
+	int positive = 0;
+	maxDev = 0;
+	unsigned char max = contourImage.getPixels()[0], min = contourImage.getPixels()[0];
+	for(int i = 0; i < contourImage.width * contourImage.height; i++)
+	{
+		if(contourImage.getPixels()[i] != 0)
+		{
+			total += (int) contourImage.getPixels()[i];
+			if(max < contourImage.getPixels()[i])
+				max = contourImage.getPixels()[i];
+			if(min > contourImage.getPixels()[i])
+				min = contourImage.getPixels()[i];
+			positive++;
+		}
+	}
+	maxDev = max - min;
+	if(positive != 0)
+		average = total / positive;
+	else
+		average = 0;
 }
 
 void testApp::simpleROI()
