@@ -41,6 +41,7 @@ class testApp : public ofBaseApp{
 		//Util Functions
 		void translateCoord(int &x, int &y, int widgetX, int widgetY);
         void initData();
+		void saveMesh();
 
 		//Filter Functions
 		void simpleROI();

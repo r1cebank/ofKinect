@@ -126,16 +126,35 @@ void testApp::frameMergeFilter(){
 }
 
 void testApp::drawContours(){
+	float x, y, area, length, width, height;
+	float realX, realY;
+	ofPoint centroid;
+	ofxCvBlob blob;
 	ofNoFill();
 	if(contourOn){
 		contourFinder.draw(20, 70, 640, 480);
 		ofColor c(255, 0, 0);
 		for(int i = 0; i < contourFinder.nBlobs; i++) {
-			ofRectangle r = contourFinder.blobs.at(i).boundingRect;
+			//Setting useful variables
+			blob = contourFinder.blobs.at(i);
+			ofRectangle r = blob.boundingRect;
+			x = r.x; y = r.y; width = r.width; height = r.height; centroid = blob.centroid; area = blob.area;
+			length = blob.length; //Messy no return multiline
+
+			//Drawing rectangle
 			r.x += 20; r.y += 70;
 			c.setHsb(i * 64, 255, 255);
 			ofSetColor(c);
 			ofRect(r);
+			//Drawing point
+			ofCircle(centroid.x + 20, centroid.y + 70, 4);
+
+			//Drawing informations
+			realX = x + 20;
+			realY = y + 70;
+			ofDrawBitmapString("x:" + ofToString(x) + " y:" + ofToString(y), realX, realY - 11);
+			ofDrawBitmapString("width:" + ofToString(width) + " height:" + ofToString(height), realX, realY - 11*2);
+			ofDrawBitmapString("area:" + ofToString(area) + " length:" + ofToString(length), realX, realY - 11*3);
 		}
 	}
 	ofFill();
@@ -253,9 +272,31 @@ void testApp::guiEvent(ofxUIEventArgs &e)
 			ofSaveImage(kinect.getPixelsRef(), "capture/" + ofGetTimestampString() + ".jpg", OF_IMAGE_QUALITY_BEST);
 			c.saveToRaw("capture/" + ofGetTimestampString() + ".raw", kinect.getRawDepthPixels());
 			c.saveToCompressedPng("capture/" + ofGetTimestampString() + ".png", kinect.getRawDepthPixels());
+			saveMesh();
 #endif
 #endif
 		}
 	}
 }
 
+void testApp::saveMesh() {
+	int w = 640;
+	int h = 480;
+	ofMesh mesh;
+	mesh.setMode(OF_PRIMITIVE_POINTS);
+	int step = 2;
+	for(int y = 0; y < h; y += step) {
+		for(int x = 0; x < w; x += step) {
+			if(kinect.getDistanceAt(x, y) > 0) {
+				mesh.addColor(kinect.getColorAt(x,y));
+				/*ofVec3f realV;
+				realV.x = kinect.getWorldCoordinateAt(x, y).x;
+				realV.y = (h - 1) - kinect.getWorldCoordinateAt(x, y).y;
+				realV.z = 255 - kinect.getWorldCoordinateAt(x, y).z;
+				mesh.addVertex(realV);*/
+				mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
+			}
+		}
+	}
+	mesh.save("capture/" + ofGetTimestampString() + ".kmesh");
+}
